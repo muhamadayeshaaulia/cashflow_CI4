@@ -6,13 +6,13 @@ use CodeIgniter\Model;
 
 class KasKeluarModel extends Model
 {
-    protected $table            = 'kaskeluars';
+    protected $table            = 'kas_keluar';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = ['tanggal_pengajuan', 'deskripsi', 'nominal', 'status','id_purchasing', 'id_manager','id_admin','bukti_pembayaran'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
@@ -21,7 +21,7 @@ class KasKeluarModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
