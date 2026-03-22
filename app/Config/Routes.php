@@ -11,3 +11,10 @@ $routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/login/process', 'AuthController::process');
 $routes->get('/logout', 'AuthController::logout');
+
+// routes purchasing
+$routes->get('/purchasing', 'PurchasingController::index');
+//routes manager
+$routes->get('/manajer', 'ManajerController::index');
+//routes admin
+$routes->get('/admin', 'AdminController::index');
