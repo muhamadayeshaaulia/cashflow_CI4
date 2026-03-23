@@ -1,16 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="p-4">
+<?= $this->extend('layout/template') ?>
 
-    <h1>Selamat Datang di Dashboard!</h1>
-    <p>Anda login sebagai: <strong><?= session()->get('username') ?></strong> (Role: <?= session()->get('role') ?>)</p>
-
-    <a href="<?= base_url('/logout') ?>" class="btn btn-danger">Logout</a>
-
-</body>
-</html>
+<?= $this->section('content') ?>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <h4 class="card-title">Dashboard Purchasing</h4>
+        <p class="text-muted">Selamat datang di Sistem Informasi Akuntansi Cash Flow PT Sariling Aneka Energi.</p>
+        <hr>
+        <p>Gunakan menu di sebelah kiri untuk mengajukan form pengeluaran kas kepada Manajer Keuangan.</p>
+    </div>
+</div>
+<?= $this->endSection() ?>
