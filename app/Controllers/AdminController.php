@@ -4,70 +4,125 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\KasKeluarModel;
+use App\Models\KasMasukModel; // Panggil model Kas Masuk
 
 class AdminController extends BaseController
 {
     protected $kasKeluarModel;
+    protected $kasMasukModel;
 
     public function __construct()
     {
-        // Panggil model kas keluar agar admin bisa baca data yang sudah di-ACC
         $this->kasKeluarModel = new KasKeluarModel();
+        $this->kasMasukModel  = new KasMasukModel(); // Inisialisasi
     }
 
     public function index()
     {
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
-
-        $data = ['title' => 'Dashboard Admin Keuangan'];
-        return view('admin/dashboard', $data);
+        return view('admin/dashboard', ['title' => 'Dashboard Admin Keuangan']);
     }
 
-    // Fungsi untuk menampilkan halaman pembayaran
+    // ==========================================
+    // BAGIAN 1: PEMBAYARAN VENDOR (KAS KELUAR)
+    // ==========================================
     public function pembayaran()
     {
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
 
         $data = [
-            'title' => 'Realisasi Pembayaran Vendor',
-            // Ambil data yang siap dibayar (status: acc)
+            'title'      => 'Realisasi Pembayaran Vendor',
             'siap_bayar' => $this->kasKeluarModel->where('status', 'acc')->findAll(),
-            // Ambil data riwayat yang sudah selesai dibayar
-            'riwayat' => $this->kasKeluarModel->where('status', 'dibayar')->orderBy('updated_at', 'DESC')->findAll()
+            'riwayat'    => $this->kasKeluarModel->where('status', 'dibayar')->orderBy('updated_at', 'DESC')->findAll()
         ];
-        
         return view('admin/pembayaran', $data);
     }
 
-    // Fungsi untuk memproses upload bukti transfer
     public function prosesBayar()
     {
         $id = $this->request->getPost('id_pengajuan');
-        
-        // Menangkap file yang diupload
         $fileBukti = $this->request->getFile('bukti_pembayaran');
         $namaBukti = null;
 
-        // Cek apakah ada file yang diupload dan valid
         if ($fileBukti && $fileBukti->isValid() && !$fileBukti->hasMoved()) {
-            // Hasilkan nama file acak agar aman dan tidak menimpa file bernama sama
             $namaBukti = $fileBukti->getRandomName();
-            
-            // Pindahkan file ke folder public/uploads/bukti
             $fileBukti->move('uploads/bukti', $namaBukti);
         }
 
-        // Update status di database menjadi 'dibayar' beserta nama file buktinya
         $this->kasKeluarModel->update($id, [
             'status'           => 'dibayar',
-            'id_admin'         => session()->get('id'), // Catat siapa admin yang bayar
+            'id_admin'         => session()->get('id'),
             'bukti_pembayaran' => $namaBukti
         ]);
 
-        // CATATAN UNTUK NANTI: Di baris ini nanti kita akan tambahkan 
-        // kode otomatis untuk memasukkan data ke tabel Jurnal Akuntansi.
-
-        session()->setFlashdata('pesan', 'Pembayaran berhasil diproses dan bukti telah disimpan.');
+        session()->setFlashdata('pesan', 'Pembayaran berhasil diproses.');
         return redirect()->to('/admin/pembayaran');
+    }
+
+    // ==========================================
+    // BAGIAN 2: PENERIMAAN DINAS (KAS MASUK)
+    // ==========================================
+    public function kasMasuk()
+    {
+        if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
+
+        $data = [
+            'title'     => 'Penerimaan Proyek Dinas',
+            // Menampilkan semua data kas masuk, diurutkan dari yang terbaru
+            'kas_masuk' => $this->kasMasukModel->orderBy('id', 'DESC')->findAll()
+        ];
+        return view('admin/kas_masuk', $data);
+    }
+
+    // Menyimpan penagihan baru ke Dinas
+    public function simpanKasMasuk()
+    {
+        $dataSimpan = [
+            'tanggal_pembuatan' => $this->request->getPost('tanggal_pembuatan'),
+            'no_bast'           => $this->request->getPost('no_bast'),
+            'no_tagihan'        => $this->request->getPost('no_tagihan'),
+            'nominal'           => str_replace(['Rp', '.', ','], '', $this->request->getPost('nominal')),
+            'status'            => 'proses_kirim' // Status awal saat dokumen BAST dibuat
+        ];
+
+        $this->kasMasukModel->insert($dataSimpan);
+        session()->setFlashdata('pesan', 'Data penagihan proyek dinas berhasil ditambahkan.');
+        return redirect()->to('/admin/kas-masuk');
+    }
+
+    // Mengupdate status pergerakan dokumen/uang
+    public function updateKasMasuk()
+    {
+        $id   = $this->request->getPost('id_kas_masuk');
+        $aksi = $this->request->getPost('aksi_status');
+
+        $dataUpdate = [];
+
+        // Logika pergerakan status
+        if ($aksi == 'tagihan_dikirim') {
+            $dataUpdate['status'] = 'tagihan_dikirim';
+            session()->setFlashdata('pesan', 'Status: Tagihan telah dikirim ke dinas.');
+        
+        } elseif ($aksi == 'sp2d_terbit') {
+            $dataUpdate['status']  = 'sp2d_terbit';
+            $dataUpdate['no_sp2d'] = $this->request->getPost('no_sp2d');
+            session()->setFlashdata('pesan', 'Status: SP2D berhasil diterbitkan.');
+        
+        } elseif ($aksi == 'lunas') {
+            $dataUpdate['status'] = 'lunas';
+            
+            // Proses upload bukti transfer uang masuk dari dinas
+            $fileBukti = $this->request->getFile('bukti_transfer');
+            if ($fileBukti && $fileBukti->isValid() && !$fileBukti->hasMoved()) {
+                $namaBukti = $fileBukti->getRandomName();
+                // Kita pisahkan foldernya ke bukti_masuk agar rapi
+                $fileBukti->move('uploads/bukti_masuk', $namaBukti); 
+                $dataUpdate['bukti_transfer'] = $namaBukti;
+            }
+            session()->setFlashdata('pesan', 'Hore! Pembayaran dari Dinas telah diterima (Lunas).');
+        }
+
+        $this->kasMasukModel->update($id, $dataUpdate);
+        return redirect()->to('/admin/kas-masuk');
     }
 }
