@@ -13,7 +13,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f5f5f9; /* Warna background abu-abu sangat muda (khas Sneat/Premium template) */
+            background-color: #f5f5f9;
             color: #566a7f;
             overflow-x: hidden;
         }
