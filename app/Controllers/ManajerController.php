@@ -3,20 +3,54 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\KasKeluarModel; // Jangan lupa panggil modelnya
 
 class ManajerController extends BaseController
 {
-   public function index()
+    protected $kasKeluarModel;
+
+    public function __construct()
     {
-        if (session()->get('role') !== 'manajer') {
-            return redirect()->to('/login');
-        }
+        $this->kasKeluarModel = new KasKeluarModel();
+    }
+
+    public function index()
+    {
+        if (session()->get('role') !== 'manajer') return redirect()->to('/login');
+
+        $data = ['title' => 'Dashboard Manajer Keuangan'];
+        return view('manajer/dashboard', $data);
+    }
+
+    // Menampilkan daftar pengajuan yang butuh ACC (status: pending)
+    public function persetujuan()
+    {
+        if (session()->get('role') !== 'manajer') return redirect()->to('/login');
 
         $data = [
-            'title' => 'Dashboard Manajer Keuangan'
+            'title' => 'Verifikasi & Otorisasi Pengeluaran Kas',
+            // Kita hanya ambil data yang statusnya 'pending'
+            'pengajuan_pending' => $this->kasKeluarModel->where('status', 'pending')->orderBy('id', 'DESC')->findAll()
         ];
         
-        return view('manajer/dashboard', $data);
+        return view('manajer/persetujuan', $data);
+    }
+
+    // Memproses tombol ACC atau Tolak
+    public function updateStatus()
+    {
+        $id = $this->request->getPost('id_pengajuan');
+        $status_baru = $this->request->getPost('status_aksi'); // Isinya 'acc' atau 'ditolak'
+
+        // Update data di database
+        $this->kasKeluarModel->update($id, [
+            'status'     => $status_baru,
+            'id_manajer' => session()->get('id') // Catat siapa manajer yang meng-ACC
+        ]);
+
+        $pesan = ($status_baru == 'acc') ? 'Pengajuan berhasil di-ACC.' : 'Pengajuan telah ditolak.';
+        session()->setFlashdata('pesan', $pesan);
+
+        return redirect()->to('/manajer/persetujuan');
     }
 }
