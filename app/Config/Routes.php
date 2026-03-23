@@ -11,8 +11,6 @@ $routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/login/process', 'AuthController::process');
 $routes->get('/logout', 'AuthController::logout');
-//routes untuk halamah dashboard sementara
-$routes->get('/admin', 'AdminController::index');
 
 // routes purchasing
 $routes->group('purchasing', function($routes) {
@@ -27,5 +25,11 @@ $routes->group('manajer', function($routes) {
     $routes->get('/', 'ManajerController::index');
     $routes->get('persetujuan', 'ManajerController::persetujuan');
     $routes->post('persetujuan/update', 'ManajerController::updateStatus');
+});
+
+$routes->group('admin', function($routes) {
+    $routes->get('/', 'AdminController::index');
+    $routes->get('pembayaran', 'AdminController::pembayaran');
+    $routes->post('pembayaran/proses', 'AdminController::prosesBayar'); 
 });
 
