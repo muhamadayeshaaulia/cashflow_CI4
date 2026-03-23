@@ -29,7 +29,14 @@ $routes->group('manajer', function($routes) {
 
 $routes->group('admin', function($routes) {
     $routes->get('/', 'AdminController::index');
+    
+    // Rute Pembayaran Vendor (Kas Keluar)
     $routes->get('pembayaran', 'AdminController::pembayaran');
     $routes->post('pembayaran/proses', 'AdminController::prosesBayar'); 
+    
+    // Rute Penerimaan Dinas (Kas Masuk)
+    $routes->get('kas-masuk', 'AdminController::kasMasuk');
+    $routes->post('kas-masuk/simpan', 'AdminController::simpanKasMasuk');
+    $routes->post('kas-masuk/update', 'AdminController::updateKasMasuk');
 });
 
