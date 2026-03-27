@@ -1,0 +1,13 @@
+#--------------------------------------------------------------------
+# ENVIRONMENT
+#--------------------------------------------------------------------
+CI_ENVIRONMENT = development
+
+#--------------------------------------------------------------------
+# DATABASE
+#--------------------------------------------------------------------
+database.default.hostname = localhost
+database.default.database = db_cashflow
+database.default.username = root
+database.default.password = 
+database.default.DBDriver = MySQLi

@@ -22,10 +22,7 @@ class AdminController extends BaseController
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
         return view('admin/dashboard', ['title' => 'Dashboard Admin Keuangan']);
     }
-
-    // ==========================================
-    // BAGIAN 1: PEMBAYARAN VENDOR (KAS KELUAR)
-    // ==========================================
+    // PEMBAYARAN VENDOR (KAS KELUAR)
     public function pembayaran()
     {
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');

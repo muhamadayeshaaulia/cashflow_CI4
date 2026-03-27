@@ -110,10 +110,15 @@
         </div>
         
         <ul class="nav flex-column sidebar-nav mt-2">
-            <?php $uri = service('uri')->getSegment(1); ?>
+            <?php 
+                $uri = service('uri')->getSegment(1); 
+                
+                // Jika rolenya admin_keuangan, arahkan ke URL /admin
+                $url_dashboard = (session()->get('role') == 'admin_keuangan') ? 'admin' : session()->get('role');
+            ?>
             
             <li class="nav-item">
-                <a class="nav-link <?= ($uri == session()->get('role')) ? 'active' : '' ?>" href="<?= base_url('/' . session()->get('role')) ?>">
+                <a class="nav-link <?= ($uri == $url_dashboard) ? 'active' : '' ?>" href="<?= base_url('/' . $url_dashboard) ?>">
                     <i class="bi bi-grid-fill"></i> Dashboard
                 </a>
             </li>
@@ -130,7 +135,7 @@
             <?php if(session()->get('role') == 'manajer'): ?>
             <li class="nav-item mt-3 mb-1 px-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 600;">Menu Persetujuan</li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= base_url('/manajer/persetujuan') ?>">
+                <a class="nav-link" href="<?= base_url('/persetujuan') ?>">
                     <i class="bi bi-check-circle"></i> Verifikasi ACC
                 </a>
             </li>
