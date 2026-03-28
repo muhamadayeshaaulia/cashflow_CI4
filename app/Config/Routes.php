@@ -14,9 +14,8 @@ $routes->get('/logout', 'AuthController::logout');
 $routes->get('/laporan', 'LaporanController::index');
 
 // routes purchasing
-$routes->group('purchasing', function($routes) {
-
-    $routes->get('/', 'PurchasingController::index');     
+$routes->group('purchasing', ['filter' => 'role:purchasing'], function($routes) {
+    $routes->get('/', 'PurchasingController::index'); 
     $routes->get('pengajuan', 'PurchasingController::pengajuan');
     $routes->post('pengajuan/simpan', 'PurchasingController::simpanPengajuan');
 });
