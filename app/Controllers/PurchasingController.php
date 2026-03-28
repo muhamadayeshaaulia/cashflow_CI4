@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\KasKeluarModel; // Panggil modelnya
+use App\Models\KasKeluarModel;
 
 class PurchasingController extends BaseController
 {
@@ -11,7 +11,6 @@ class PurchasingController extends BaseController
 
     public function __construct()
     {
-        // Inisialisasi Model agar bisa dipakai di semua fungsi
         $this->kasKeluarModel = new KasKeluarModel();
     }
 
@@ -19,18 +18,22 @@ class PurchasingController extends BaseController
     {
         if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
         
-        $data = ['title' => 'Dashboard Purchasing'];
+        $nip = session()->get('nip');
+        $data = [
+            'title' => 'Dashboard Purchasing',
+            // Data tambahan untuk dashboard agar tidak kosong
+            'total_pengajuan' => $this->kasKeluarModel->where('nip_purchasing', $nip)->selectSum('total_pengajuan')->get()->getRow()->total_pengajuan ?? 0,
+            'jumlah_pending'  => $this->kasKeluarModel->where(['nip_purchasing' => $nip, 'status' => 'pending'])->countAllResults()
+        ];
         return view('purchasing/dashboard', $data);
     }
 
-    // Fungsi untuk menampilkan halaman Form Pengajuan
     public function pengajuan()
     {
         if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
 
         $data = [
             'title' => 'Form Pengajuan Kas Keluar',
-            // ambil history pengajuan user ini untuk ditampilkan di tabel
             'history_pengajuan' => $this->kasKeluarModel
                                         ->where('nip_purchasing', session()->get('nip'))
                                         ->orderBy('id', 'DESC')
@@ -40,21 +43,24 @@ class PurchasingController extends BaseController
         return view('purchasing/pengajuan', $data);
     }
 
-    // Fungsi untuk memproses data dari form dan menyimpan ke database
-   public function simpanPengajuan()
+    public function simpanPengajuan()
     {
+        $rek_raw = $this->request->getPost('rekening_vendor');
+        $rek_clean = preg_replace('/\D/', '', $rek_raw);
+        // Ambil data nominal
         $nominal = $this->request->getPost('nominal_barang') ?? 0;
         $pajak   = $this->request->getPost('pajak_ppn') ?? 0;
         $ongkir  = $this->request->getPost('biaya_ongkir') ?? 0;
-        $total   = $nominal + $pajak + $ongkir; // Hitung Total Otomatis
+        $total   = $nominal + $pajak + $ongkir;
 
+        // Simpan ke Database
         $this->kasKeluarModel->insert([
             'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
             'divisi_peminta'    => $this->request->getPost('divisi_peminta'),
             'deskripsi'         => $this->request->getPost('deskripsi'),
             'nama_vendor'       => $this->request->getPost('nama_vendor'),
             'bank_vendor'       => $this->request->getPost('bank_vendor'),
-            'rekening_vendor'   => $this->request->getPost('rekening_vendor'),
+            'rekening_vendor'   => $rek_clean,
             'nominal_barang'    => $nominal,
             'pajak_ppn'         => $pajak,
             'biaya_ongkir'      => $ongkir,
@@ -63,6 +69,6 @@ class PurchasingController extends BaseController
             'nip_purchasing'    => session()->get('nip')
         ]);
 
-        return redirect()->to('/purchasing/pengajuan')->with('pesan', 'Pengajuan berhasil dikirim.');
+        return redirect()->to('/purchasing/pengajuan')->with('pesan', 'Pengajuan Berhasil Dikirim!');
     }
 }
