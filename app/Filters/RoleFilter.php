@@ -25,7 +25,25 @@ class RoleFilter implements FilterInterface
      */
     public function before(RequestInterface $request, $arguments = null)
     {
-        //
+        // Cek apakah user SUDAH LOGIN?
+        if (!session()->get('isLoggedIn')) {
+            // Jika belum, tendang kembali ke halaman login dengan pesan error
+            session()->setFlashdata('error', 'Akses ditolak! Silakan login terlebih dahulu.');
+            return redirect()->to('/login');
+        }
+
+        // Cek apakah ROLE (Hak Akses) user sesuai dengan yang diizinkan rute?
+        if ($arguments) {
+            $role_user = session()->get('role');
+            
+            // Jika role user saat ini tidak ada di dalam daftar argumen rute yang diizinkan
+            if (!in_array($role_user, $arguments)) {
+                
+                // Tendang kembali ke dashboard masing-masing sesuai role-nya
+                $url_dashboard = ($role_user == 'admin_keuangan') ? '/admin' : '/' . $role_user;
+                return redirect()->to($url_dashboard);
+            }
+        }
     }
 
     /**
