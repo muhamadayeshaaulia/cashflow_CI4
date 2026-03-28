@@ -45,6 +45,7 @@ class PurchasingController extends BaseController
     {
         $this->kasKeluarModel->insert([
             'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
+            'divisi_peminta'    => $this->request->getPost('divisi_peminta'),
             'deskripsi'         => $this->request->getPost('deskripsi'),
             'nominal'           => str_replace(['Rp', '.', ','], '', $this->request->getPost('nominal')),
             'status'            => 'pending',
