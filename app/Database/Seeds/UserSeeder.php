@@ -8,9 +8,10 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        // 3 data pegawai sekaligus akunnya
+        // 3 data pegawai beserta NIP-nya
         $karyawan = [
             [
+                'nip'      => '198501012010011001',
                 'username' => 'purchasing',
                 'password' => password_hash('123456', PASSWORD_DEFAULT),
                 'nama'     => 'Budi Santoso',
@@ -19,6 +20,7 @@ class UserSeeder extends Seeder
                 'role'     => 'purchasing'
             ],
             [
+                'nip'      => '197805122005011002',
                 'username' => 'manajer',
                 'password' => password_hash('123456', PASSWORD_DEFAULT),
                 'nama'     => 'Andi Wijaya',
@@ -27,6 +29,7 @@ class UserSeeder extends Seeder
                 'role'     => 'manajer'
             ],
             [
+                'nip'      => '199011232015032001',
                 'username' => 'admin_keuangan',
                 'password' => password_hash('123456', PASSWORD_DEFAULT),
                 'nama'     => 'Siti Aminah',
@@ -45,11 +48,12 @@ class UserSeeder extends Seeder
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            // Ambil ID User yang baru saja terbuat secara otomatis (Auto Increment)
+            // Ambil ID User yang baru saja terbuat
             $userId = $this->db->insertID();
 
-            // Masukkan biodata ke tabel 'pegawai' dan sambungkan dengan ID User tadi
+            // Masukkan biodata ke tabel 'pegawai' dengan menyertakan NIP
             $this->db->table('pegawai')->insert([
+                'nip'          => $data['nip'], // NIP dimasukkan di sini
                 'user_id'      => $userId,
                 'nama_lengkap' => $data['nama'],
                 'email'        => $data['email'],

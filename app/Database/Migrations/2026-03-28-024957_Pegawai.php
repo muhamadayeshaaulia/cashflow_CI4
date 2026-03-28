@@ -9,13 +9,12 @@ class Pegawai extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => [
-                'type'           => 'INT',
-                'constraint'     => 11,
-                'unsigned'       => true,
-                'auto_increment' => true,
+            // NIP menjadi Primary Key (Tipe VARCHAR karena NIP biasanya panjang dan bisa mengandung spasi/titik)
+            'nip' => [
+                'type'       => 'VARCHAR',
+                'constraint' => '50',
             ],
-            // Menyambungkan pegawai dengan User
+            // user_id untuk menyambungkan ke tabel users (akun login)
             'user_id' => [
                 'type'           => 'INT',
                 'constraint'     => 11,
@@ -49,10 +48,10 @@ class Pegawai extends Migration
             ],
         ]);
 
-        $this->forge->addKey('id', true); // Primary Key
+        // Jadikan NIP sebagai kunci utama (Primary Key)
+        $this->forge->addKey('nip', true); 
         
-        // Membuat Garis Relasi Fisik (Foreign Key)
-        // Jika data di tabel users dihapus (CASCADE), maka data pegawai ikut terhapus otomatis!
+        // Relasi ke tabel users tetap dipertahankan
         $this->forge->addForeignKey('user_id', 'users', 'id', 'CASCADE', 'CASCADE');
         
         $this->forge->createTable('pegawai');
