@@ -30,7 +30,7 @@ class PurchasingController extends BaseController
 
         $data = [
             'title' => 'Form Pengajuan Kas Keluar',
-            // Kita juga sekalian ambil history pengajuan user ini untuk ditampilkan di tabel
+            // ambil history pengajuan user ini untuk ditampilkan di tabel
             'history_pengajuan' => $this->kasKeluarModel
                                         ->where('id_purchasing', session()->get('id'))
                                         ->orderBy('id', 'DESC')
@@ -43,23 +43,16 @@ class PurchasingController extends BaseController
     // Fungsi untuk memproses data dari form dan menyimpan ke database
     public function simpanPengajuan()
     {
-        // Ambil data dari form input
-        $dataSimpan = [
+        $this->kasKeluarModel->insert([
             'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
             'deskripsi'         => $this->request->getPost('deskripsi'),
-            // Kita hilangkan titik/koma ribuan sebelum masuk ke database
             'nominal'           => str_replace(['Rp', '.', ','], '', $this->request->getPost('nominal')),
-            'status'            => 'pending', // Default saat baru diajukan
-            'id_purchasing'     => session()->get('id') // Ambil ID user yang sedang login
-        ];
+            'status'            => 'pending',
+            // REVISI: Menggunakan NIP dari session
+            'nip_purchasing'    => session()->get('nip') 
+        ]);
 
-        // Simpan ke database menggunakan Model
-        $this->kasKeluarModel->insert($dataSimpan);
-
-        // Buat pesan sukses sementara menggunakan Flashdata session
-        session()->setFlashdata('pesan', 'Pengajuan kas berhasil dikirim ke Manajer Keuangan.');
-
-        // Kembalikan ke halaman form
+        session()->setFlashdata('pesan', 'Pengajuan berhasil dikirim ke Manajer.');
         return redirect()->to('/purchasing/pengajuan');
     }
 }
