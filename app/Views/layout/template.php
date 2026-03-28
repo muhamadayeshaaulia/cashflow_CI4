@@ -135,7 +135,7 @@
             <?php if(session()->get('role') == 'manajer'): ?>
             <li class="nav-item mt-3 mb-1 px-3 text-uppercase text-muted" style="font-size: 0.75rem; font-weight: 600;">Menu Persetujuan</li>
             <li class="nav-item">
-                <a class="nav-link" href="<?= base_url('/persetujuan') ?>">
+                <a class="nav-link" href="<?= base_url('/manajer/persetujuan') ?>">
                     <i class="bi bi-check-circle"></i> Verifikasi ACC
                 </a>
             </li>
@@ -179,11 +179,11 @@
                 
                 <div class="d-flex align-items-center ms-auto">
                     <div class="me-3 text-end d-none d-md-block">
-                        <span class="d-block text-dark fw-semibold" style="font-size: 0.9rem;"><?= ucfirst(session()->get('username')) ?></span>
+                        <span class="d-block text-dark fw-semibold" style="font-size: 0.9rem;"><?= session()->get('nama_lengkap') ?></span>
                         <span class="text-muted d-block" style="font-size: 0.75rem;"><?= str_replace('_', ' ', strtoupper(session()->get('role'))) ?></span>
                     </div>
                     <div class="rounded-circle d-flex justify-content-center align-items-center text-white fw-bold me-3" style="width: 40px; height: 40px; background-color: #696cff;">
-                        <?= strtoupper(substr(session()->get('username'), 0, 1)) ?>
+                        <?= strtoupper(substr(session()->get('nama_lengkap'), 0, 1)) ?>
                     </div>
                     <a href="<?= base_url('/logout') ?>" class="btn btn-sm btn-outline-danger" style="border-radius: 0.375rem;">
                         <i class="bi bi-power"></i>
