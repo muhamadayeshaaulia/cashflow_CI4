@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\KasKeluarModel; // Jangan lupa panggil modelnya
+use App\Models\KasKeluarModel;
 
 class ManajerController extends BaseController
 {
@@ -29,7 +29,7 @@ class ManajerController extends BaseController
 
         $data = [
             'title' => 'Verifikasi & Otorisasi Pengeluaran Kas',
-            // Kita hanya ambil data yang statusnya 'pending'
+            // ambil data yang statusnya 'pending'
             'pengajuan_pending' => $this->kasKeluarModel->where('status', 'pending')->orderBy('id', 'DESC')->findAll()
         ];
         
@@ -37,15 +37,15 @@ class ManajerController extends BaseController
     }
 
     // Memproses tombol ACC atau Tolak
-    public function updateStatus()
+   public function updateStatus()
     {
         $id = $this->request->getPost('id_pengajuan');
-        $status_baru = $this->request->getPost('status_aksi'); // Isinya 'acc' atau 'ditolak'
+        $status_baru = $this->request->getPost('status_aksi');
 
-        // Update data di database
+        // Update status dan rekam NIP Manajer yang ACC/Tolak
         $this->kasKeluarModel->update($id, [
-            'status'     => $status_baru,
-            'id_manajer' => session()->get('id') // Catat siapa manajer yang meng-ACC
+            'status'      => $status_baru,
+            'nip_manajer' => session()->get('nip') 
         ]);
 
         $pesan = ($status_baru == 'acc') ? 'Pengajuan berhasil di-ACC.' : 'Pengajuan telah ditolak.';

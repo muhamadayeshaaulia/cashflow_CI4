@@ -48,7 +48,7 @@ class PurchasingController extends BaseController
             'deskripsi'         => $this->request->getPost('deskripsi'),
             'nominal'           => str_replace(['Rp', '.', ','], '', $this->request->getPost('nominal')),
             'status'            => 'pending',
-            // REVISI: Menggunakan NIP dari session
+            //Menggunakan NIP dari session
             'nip_purchasing'    => session()->get('nip') 
         ]);
 
