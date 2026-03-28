@@ -27,14 +27,11 @@ $routes->group('manajer', ['filter' => 'role:manajer'], function($routes) {
     $routes->post('persetujuan/update', 'ManajerController::updateStatus');
 });
 
-$routes->group('admin', function($routes) {
+// routes untuk admin_keuangan
+$routes->group('admin', ['filter' => 'role:admin_keuangan'], function($routes) {
     $routes->get('/', 'AdminController::index');
-    
-    // Rute Pembayaran Vendor (Kas Keluar)
     $routes->get('pembayaran', 'AdminController::pembayaran');
     $routes->post('pembayaran/proses', 'AdminController::prosesBayar'); 
-    
-    // Rute Penerimaan Dinas (Kas Masuk)
     $routes->get('kas-masuk', 'AdminController::kasMasuk');
     $routes->post('kas-masuk/simpan', 'AdminController::simpanKasMasuk');
     $routes->post('kas-masuk/update', 'AdminController::updateKasMasuk');
