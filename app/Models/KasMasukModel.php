@@ -12,7 +12,9 @@ class KasMasukModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['tanggal_pembuatan', 'no_bast', 'no_tagihan', 'no_sp2d', 'nominal', 'status', 'bukti_transfer', 'nip_admin'];
+    protected $allowedFields = ['tanggal_pembuatan', 'nama_proyek', 'no_bast', 'no_tagihan', 'no_sp2d', 
+    'nominal_kontrak', 'potongan_pajak', 'nominal_netto', 
+    'status', 'bukti_transfer', 'nip_admin'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
