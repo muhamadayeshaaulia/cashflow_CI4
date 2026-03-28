@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\KasKeluarModel;
-use App\Models\KasMasukModel; // Panggil model Kas Masuk
+use App\Models\KasMasukModel;
 
 class AdminController extends BaseController
 {
@@ -14,7 +14,7 @@ class AdminController extends BaseController
     public function __construct()
     {
         $this->kasKeluarModel = new KasKeluarModel();
-        $this->kasMasukModel  = new KasMasukModel(); // Inisialisasi
+        $this->kasMasukModel  = new KasMasukModel();
     }
 
     public function index()
@@ -55,10 +55,7 @@ class AdminController extends BaseController
         session()->setFlashdata('pesan', 'Pembayaran berhasil diproses.');
         return redirect()->to('/admin/pembayaran');
     }
-
-    // ==========================================
-    // BAGIAN 2: PENERIMAAN DINAS (KAS MASUK)
-    // ==========================================
+    // BAGIAN PENERIMAAN DINAS (KAS MASUK)
     public function kasMasuk()
     {
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
