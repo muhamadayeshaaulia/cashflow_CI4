@@ -21,7 +21,7 @@ $routes->group('purchasing', ['filter' => 'role:purchasing'], function($routes) 
 });
 
 // routes manager
-$routes->group('manajer', function($routes) {
+$routes->group('manajer', ['filter' => 'role:manajer'], function($routes) {
     $routes->get('/', 'ManajerController::index');
     $routes->get('persetujuan', 'ManajerController::persetujuan');
     $routes->post('persetujuan/update', 'ManajerController::updateStatus');
