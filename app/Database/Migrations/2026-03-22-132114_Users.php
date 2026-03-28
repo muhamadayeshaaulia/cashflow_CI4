@@ -23,10 +23,6 @@ class Users extends Migration
                 'type'       => 'VARCHAR',
                 'constraint' => '255',
             ],
-            'role' => [
-                'type'       => 'ENUM',
-                'constraint' => ['purchasing', 'manajer', 'admin_keuangan'],
-            ],
             'created_at' => [
                 'type' => 'DATETIME',
                 'null' => true,
