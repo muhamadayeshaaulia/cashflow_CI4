@@ -27,8 +27,8 @@ class AuthController extends BaseController
         
         // Menggabungkan (JOIN) tabel users dan pegawai
         $user = $db->table('users')
-                   ->select('users.id, users.username, users.password, pegawai.nama_lengkap, pegawai.role')
-                   ->join('pegawai', 'pegawai.user_id = users.id') // Titik pertemuannya
+                   ->select('users.id, users.username, users.password, pegawai.nip, pegawai.nama_lengkap, pegawai.role')
+                   ->join('pegawai', 'pegawai.user_id = users.id')
                    ->where('users.username', $username)
                    ->get()
                    ->getRowArray();
@@ -41,6 +41,7 @@ class AuthController extends BaseController
                 // Simpan data ke memori (Session)
                 $sessionData = [
                     'id'           => $user['id'],
+                    'nip'          => $user['nip'],
                     'username'     => $user['username'],
                     'nama_lengkap' => $user['nama_lengkap'],
                     'role'         => $user['role'],
