@@ -32,7 +32,7 @@ class PurchasingController extends BaseController
             'title' => 'Form Pengajuan Kas Keluar',
             // ambil history pengajuan user ini untuk ditampilkan di tabel
             'history_pengajuan' => $this->kasKeluarModel
-                                        ->where('id_purchasing', session()->get('id'))
+                                        ->where('nip_purchasing', session()->get('nip'))
                                         ->orderBy('id', 'DESC')
                                         ->findAll()
         ];
