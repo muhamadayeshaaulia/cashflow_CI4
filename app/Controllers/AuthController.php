@@ -3,77 +3,68 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
-use App\Models\UserModel;
 
 class AuthController extends BaseController
 {
     public function index()
     {
-        // Jika user sudah login, arahkan langsung ke dashboard sesuai role-nya
+        // Jika sudah login, langsung tendang ke dashboard masing-masing
         if (session()->get('isLoggedIn')) {
-            return $this->redirectByRole(session()->get('role'));
+            $role = session()->get('role');
+            $url_dashboard = ($role == 'admin_keuangan') ? '/admin' : '/' . $role;
+            return redirect()->to($url_dashboard);
         }
 
-        // Tampilkan halaman login
         return view('auth/login');
     }
 
     public function process()
     {
-        $userModel = new UserModel();
-        
-        // Ambil data dari form login
         $username = $this->request->getPost('username');
         $password = $this->request->getPost('password');
 
-        // Cari user di database berdasarkan username
-        $user = $userModel->where('username', $username)->first();
+        $db = \Config\Database::connect();
+        
+        // Menggabungkan (JOIN) tabel users dan pegawai
+        $user = $db->table('users')
+                   ->select('users.id, users.username, users.password, pegawai.nama_lengkap, pegawai.role')
+                   ->join('pegawai', 'pegawai.user_id = users.id') // Titik pertemuannya
+                   ->where('users.username', $username)
+                   ->get()
+                   ->getRowArray();
 
-        // Jika user ditemukan
+        // Jika username ditemukan di database
         if ($user) {
-            // Verifikasi password yang diinput dengan password hash di database
+            // Cek kecocokan password
             if (password_verify($password, $user['password'])) {
                 
-                // Jika cocok, simpan data ke dalam session
+                // Simpan data ke memori (Session)
                 $sessionData = [
-                    'id'         => $user['id'],
-                    'username'   => $user['username'],
-                    'role'       => $user['role'],
-                    'isLoggedIn' => true
+                    'id'           => $user['id'],
+                    'username'     => $user['username'],
+                    'nama_lengkap' => $user['nama_lengkap'],
+                    'role'         => $user['role'],
+                    'isLoggedIn'   => true
                 ];
                 session()->set($sessionData);
 
                 // Arahkan ke dashboard sesuai role
-                return $this->redirectByRole($user['role']);
+                $url_dashboard = ($user['role'] == 'admin_keuangan') ? '/admin' : '/' . $user['role'];
+                return redirect()->to($url_dashboard);
+                
             } else {
-                // Password salah
                 session()->setFlashdata('error', 'Password salah!');
-                return redirect()->to('/login');
+                return redirect()->back();
             }
         } else {
-            // Username tidak ditemukan
             session()->setFlashdata('error', 'Username tidak ditemukan!');
-            return redirect()->to('/login');
+            return redirect()->back();
         }
     }
 
     public function logout()
     {
-        // Hapus semua data session dan kembalikan ke halaman login
         session()->destroy();
         return redirect()->to('/login');
-    }
-
-    // Fungsi bantuan untuk mengarahkan halaman berdasarkan role
-    private function redirectByRole($role)
-    {
-        if ($role === 'purchasing') {
-            return redirect()->to('/purchasing');
-        } elseif ($role === 'manajer') {
-            return redirect()->to('/manajer');
-        } elseif ($role === 'admin_keuangan') {
-            return redirect()->to('/admin');
-        }
     }
 }
