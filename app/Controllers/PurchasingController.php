@@ -41,19 +41,28 @@ class PurchasingController extends BaseController
     }
 
     // Fungsi untuk memproses data dari form dan menyimpan ke database
-    public function simpanPengajuan()
+   public function simpanPengajuan()
     {
+        $nominal = $this->request->getPost('nominal_barang') ?? 0;
+        $pajak   = $this->request->getPost('pajak_ppn') ?? 0;
+        $ongkir  = $this->request->getPost('biaya_ongkir') ?? 0;
+        $total   = $nominal + $pajak + $ongkir; // Hitung Total Otomatis
+
         $this->kasKeluarModel->insert([
             'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
             'divisi_peminta'    => $this->request->getPost('divisi_peminta'),
             'deskripsi'         => $this->request->getPost('deskripsi'),
-            'nominal'           => str_replace(['Rp', '.', ','], '', $this->request->getPost('nominal')),
+            'nama_vendor'       => $this->request->getPost('nama_vendor'),
+            'bank_vendor'       => $this->request->getPost('bank_vendor'),
+            'rekening_vendor'   => $this->request->getPost('rekening_vendor'),
+            'nominal_barang'    => $nominal,
+            'pajak_ppn'         => $pajak,
+            'biaya_ongkir'      => $ongkir,
+            'total_pengajuan'   => $total,
             'status'            => 'pending',
-            //Menggunakan NIP dari session
-            'nip_purchasing'    => session()->get('nip') 
+            'nip_purchasing'    => session()->get('nip')
         ]);
 
-        session()->setFlashdata('pesan', 'Pengajuan berhasil dikirim ke Manajer.');
-        return redirect()->to('/purchasing/pengajuan');
+        return redirect()->to('/purchasing/pengajuan')->with('pesan', 'Pengajuan berhasil dikirim.');
     }
 }
