@@ -12,7 +12,7 @@ class KasKeluarModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['tanggal_pengajuan', 'deskripsi', 'nominal', 'status','id_purchasing', 'id_manager','id_admin','bukti_pembayaran'];
+    protected $allowedFields = ['tanggal_pengajuan', 'deskripsi', 'nominal', 'status', 'bukti_pembayaran', 'nip_purchasing', 'nip_manajer', 'nip_admin'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
