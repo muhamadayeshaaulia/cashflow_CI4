@@ -22,6 +22,7 @@ class AdminController extends BaseController
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
         return view('admin/dashboard', ['title' => 'Dashboard Admin Keuangan']);
     }
+
     // PEMBAYARAN VENDOR (KAS KELUAR)
     public function pembayaran()
     {
@@ -46,16 +47,18 @@ class AdminController extends BaseController
             $fileBukti->move('uploads/bukti', $namaBukti);
         }
 
+        // ambil dari session 'nip'
         $this->kasKeluarModel->update($id, [
             'status'           => 'dibayar',
-            'id_admin'         => session()->get('id'),
+            'nip_admin'        => session()->get('nip'), 
             'bukti_pembayaran' => $namaBukti
         ]);
 
         session()->setFlashdata('pesan', 'Pembayaran berhasil diproses.');
         return redirect()->to('/admin/pembayaran');
     }
-    // BAGIAN PENERIMAAN DINAS (KAS MASUK)
+
+    // PENERIMAAN DINAS (KAS MASUK)
     public function kasMasuk()
     {
         if (session()->get('role') !== 'admin_keuangan') return redirect()->to('/login');
@@ -76,7 +79,8 @@ class AdminController extends BaseController
             'no_bast'           => $this->request->getPost('no_bast'),
             'no_tagihan'        => $this->request->getPost('no_tagihan'),
             'nominal'           => str_replace(['Rp', '.', ','], '', $this->request->getPost('nominal')),
-            'status'            => 'proses_kirim' // Status awal saat dokumen BAST dibuat
+            'status'            => 'proses_kirim', // Status awal saat dokumen BAST dibuat
+            'nip_admin'         => session()->get('nip') 
         ];
 
         $this->kasMasukModel->insert($dataSimpan);
