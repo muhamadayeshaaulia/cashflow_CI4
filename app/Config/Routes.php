@@ -11,7 +11,7 @@ $routes->get('/', 'AuthController::index');
 $routes->get('/login', 'AuthController::index');
 $routes->post('/login/process', 'AuthController::process');
 $routes->get('/logout', 'AuthController::logout');
-$routes->get('/laporan', 'LaporanController::index');
+$routes->get('/laporan', 'LaporanController::index', ['filter' => 'role:manajer,admin_keuangan']);
 
 // routes purchasing
 $routes->group('purchasing', ['filter' => 'role:purchasing'], function($routes) {
