@@ -18,6 +18,8 @@ $routes->group('purchasing', ['filter' => 'role:purchasing'], function($routes) 
     $routes->get('/', 'PurchasingController::index'); 
     $routes->get('pengajuan', 'PurchasingController::pengajuan');
     $routes->post('pengajuan/simpan', 'PurchasingController::simpanPengajuan');
+
+    $routes->post('cek-rekening', 'PurchasingController::cekRekening');
 });
 
 // routes manager
