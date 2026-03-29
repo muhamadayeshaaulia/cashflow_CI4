@@ -4,24 +4,21 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class KasKeluarModel extends Model
+class PengajuanModel extends Model
 {
-    protected $table            = 'kas_keluar';
+    protected $table            = 'pengajuan';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields = ['pengajuan_id', 
-        'nama_vendor', 
-        'bank_vendor', 
-        'rekening_vendor', 
-        'nominal_barang', 
-        'pajak_ppn', 
-        'biaya_ongkir', 
-        'total_pengajuan', 
-        'bukti_pembayaran', 
-        'nip_admin'];
+    protected $allowedFields    = ['no_pengajuan', 
+        'tanggal_pengajuan', 
+        'divisi_peminta', 
+        'deskripsi', 
+        'status', 
+        'nip_purchasing', 
+        'nip_manajer'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
