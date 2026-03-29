@@ -15,27 +15,39 @@ class PurchasingController extends BaseController
     }
 
     public function index()
-    {
-        if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
-        
-        $nip = session()->get('nip');
-        
-        // Perbaikan Query Dashboard: Ambil getRow() dengan cara yang benar
-        $totalDanaRow = $this->kasKeluarModel->where('nip_purchasing', $nip)
-                                            ->selectSum('total_pengajuan')
-                                            ->get()->getRow();
+{
+    if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
+    
+    $nip = session()->get('nip');
+    $pengajuanModel = new \App\Models\PengajuanModel(); // Kita butuh ini buat cek status & NIP
+    
+    // Hitung Total Dana yang pernah diajukan (Harus Join karena nominal ada di kas_keluar)
+    $totalDanaRow = $pengajuanModel->selectSum('kas_keluar.total_pengajuan')
+                                   ->join('kas_keluar', 'kas_keluar.pengajuan_id = pengajuan.id')
+                                   ->where('pengajuan.nip_purchasing', $nip)
+                                   ->get()->getRow();
 
-        $data = [
-            'title'           => 'Dashboard Purchasing',
-            // kalau kosong hasilnya 0
-            'total_pengajuan' => $totalDanaRow->total_pengajuan ?? 0,
-            'jumlah_pending'  => $this->kasKeluarModel->where(['nip_purchasing' => $nip, 'status' => 'pending'])->countAllResults(),
-            // Tampilkan 5 pengajuan terakhir
-            'history_dashboard' => $this->kasKeluarModel->where('nip_purchasing', $nip)->orderBy('id', 'DESC')->limit(5)->findAll()
-        ];
-        return view('purchasing/dashboard', $data);
-    }
+    $data = [
+        'title'           => 'Dashboard Purchasing',
+        'total_pengajuan' => $totalDanaRow->total_pengajuan ?? 0,
+        
+        // Hitung jumlah yang masih PENDING (Ambil dari tabel pengajuan)
+        'jumlah_pending'  => $pengajuanModel->where([
+                                    'nip_purchasing' => $nip, 
+                                    'status'         => 'pending'
+                                 ])->countAllResults(),
+                                 
+        // History 5 terakhir (Join biar dapet data lengkap)
+        'history_dashboard' => $pengajuanModel->select('pengajuan.*, kas_keluar.total_pengajuan, kas_keluar.nama_vendor')
+                                             ->join('kas_keluar', 'kas_keluar.pengajuan_id = pengajuan.id')
+                                             ->where('pengajuan.nip_purchasing', $nip)
+                                             ->orderBy('pengajuan.id', 'DESC')
+                                             ->limit(5)
+                                             ->findAll()
+    ];
 
+    return view('purchasing/dashboard', $data);
+}
     public function pengajuan()
 {
     if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
