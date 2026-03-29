@@ -27,10 +27,10 @@ class PurchasingController extends BaseController
 
         $data = [
             'title'           => 'Dashboard Purchasing',
-            // Pastikan kalau kosong hasilnya 0
+            // kalau kosong hasilnya 0
             'total_pengajuan' => $totalDanaRow->total_pengajuan ?? 0,
             'jumlah_pending'  => $this->kasKeluarModel->where(['nip_purchasing' => $nip, 'status' => 'pending'])->countAllResults(),
-            // Tambah ini buatDashboard: Tampilkan 5 pengajuan terakhir
+            // Tampilkan 5 pengajuan terakhir
             'history_dashboard' => $this->kasKeluarModel->where('nip_purchasing', $nip)->orderBy('id', 'DESC')->limit(5)->findAll()
         ];
         return view('purchasing/dashboard', $data);
