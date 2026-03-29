@@ -16,36 +16,45 @@ class ManajerController extends BaseController
 
     public function index()
     {
+        // memastikan role sesuai dengan session kamu
         if (session()->get('role') !== 'manajer') return redirect()->to('/login');
 
-        $data = ['title' => 'Dashboard Manajer Keuangan'];
+        $data = [
+            'title' => 'Dashboard Manajer Keuangan',
+            'total_pending' => $this->kasKeluarModel->where('status', 'pending')->countAllResults(),
+            'total_acc'     => $this->kasKeluarModel->where('status', 'acc')->countAllResults(),
+            'total_rupiah'  => $this->kasKeluarModel->where('status', 'pending')->selectSum('total_pengajuan')->get()->getRow()->total_pengajuan ?? 0
+        ];
         return view('manajer/dashboard', $data);
     }
 
-    // Menampilkan daftar pengajuan yang butuh ACC (status: pending)
     public function persetujuan()
     {
         if (session()->get('role') !== 'manajer') return redirect()->to('/login');
 
         $data = [
             'title' => 'Verifikasi & Otorisasi Pengeluaran Kas',
-            // ambil data yang statusnya 'pending'
+            // Ambil data pending, urutkan yang terbaru di atas
             'pengajuan_pending' => $this->kasKeluarModel->where('status', 'pending')->orderBy('id', 'DESC')->findAll()
         ];
         
         return view('manajer/persetujuan', $data);
     }
 
-    // Memproses tombol ACC atau Tolak
    public function updateStatus()
     {
         $id = $this->request->getPost('id_pengajuan');
         $status_baru = $this->request->getPost('status_aksi');
 
-        // Update status dan rekam NIP Manajer yang ACC/Tolak
+        // memastikan ID ada sebelum update
+        if (!$id) {
+            return redirect()->back()->with('error', 'ID Pengajuan tidak ditemukan.');
+        }
+
         $this->kasKeluarModel->update($id, [
             'status'      => $status_baru,
-            'nip_manajer' => session()->get('nip') 
+            'nip_manajer' => session()->get('nip'),
+            'tgl_disetujui' => date('Y-m-d H:i:s') // buat audit laporan nanti
         ]);
 
         $pesan = ($status_baru == 'acc') ? 'Pengajuan berhasil di-ACC.' : 'Pengajuan telah ditolak.';
