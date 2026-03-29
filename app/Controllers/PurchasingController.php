@@ -53,26 +53,23 @@ class PurchasingController extends BaseController
 
    public function simpanPengajuan()
 {
-    // Ambil data dan PAKSA jadi angka (float) agar tidak jadi 0
     $nominal = (float) $this->request->getPost('nominal_barang');
     $ongkir  = (float) $this->request->getPost('biaya_ongkir');
     
-    // Hitung Pajak di Server (PPN 12%)
+    // LOGIC BARU: Cek apakah input 'pakai_ppn' ada nilainya (apapun nilainya asal dicentang)
     $pajak = 0;
-    if ($this->request->getPost('pakai_ppn') || $this->request->getPost('pakai_ppn') == 'on') {
+    if ($this->request->getPost('pakai_ppn')) {
         $pajak = round($nominal * 0.12);
     }
 
-    // Hitung TOTAL AKHIR
     $total = $nominal + $pajak + $ongkir;
 
-    // Ambil Nama Bank (cek manual jika pilih LAINNYA)
+    // Ambil Nama Bank
     $bank = $this->request->getPost('bank_vendor');
     if ($bank === 'LAINNYA') {
         $bank = $this->request->getPost('bank_manual');
     }
 
-    // 5. Simpan ke Database
     $this->kasKeluarModel->insert([
         'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
         'divisi_peminta'    => $this->request->getPost('divisi_peminta'),
@@ -87,6 +84,7 @@ class PurchasingController extends BaseController
         'status'            => 'pending',
         'nip_purchasing'    => session()->get('nip'),
         'created_at'        => date('Y-m-d H:i:s'),
+        'updated_at'        => date('Y-m-d H:i:s'),
     ]);
 
     return redirect()->to('/purchasing/pengajuan')->with('pesan', 'Pengajuan Berhasil!');

@@ -134,8 +134,8 @@
                                     <option value="KALTENG">BANK KALTENG</option>
                                     <option value="KALTIM">BANK KALTIMTARA</option>
                                     <option value="SULUT">BANK SULUTGO</option>
-                                                                <option value="SULTENG">BANK SULTENG</option>
-                                                                <option value="SULTRA">BANK SULTRA</option>
+                                    <option value="SULTENG">BANK SULTENG</option>
+                                    <option value="SULTRA">BANK SULTRA</option>
                                     <option value="SULSEL">BANK SULSELBAR</option>
                                     <option value="MALUKU">BANK MALUKU MALUT</option>
                                     <option value="PAPUA">BANK PAPUA</option>
@@ -176,7 +176,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="text-secondary fw-bold mb-0">RINCIAN NOMINAL</h6>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="pakai_ppn" checked style="transform: scale(1.3);">
+                                <input class="form-check-input" type="checkbox" id="pakai_ppn" name="pakai_ppn" value="on" checked style="transform: scale(1.3);">
                                 <label class="form-check-label fw-bold small ms-2" for="pakai_ppn">PPN 12%</label>
                             </div>
                         </div>
