@@ -35,22 +35,29 @@ class ManajerController extends BaseController
         return view('manajer/dashboard', $data);
     }
 
-    public function persetujuan()
-    {
+        public function persetujuan()
+        {
         if (session()->get('role') !== 'manajer') return redirect()->to('/login');
 
         $data = [
-            'title' => 'Verifikasi & Otorisasi Pengeluaran Kas',
-            // AMBIL DATA DARI DUA TABEL (JOIN)
+            'title' => 'Verifikasi & Otorisasi',
+            // Ambil yang PENDING
             'pengajuan_pending' => $this->pengajuanModel->select('pengajuan.*, kas_keluar.*')
-                                                       ->join('kas_keluar', 'kas_keluar.pengajuan_id = pengajuan.id')
-                                                       ->where('pengajuan.status', 'pending')
-                                                       ->orderBy('pengajuan.id', 'DESC')
-                                                       ->findAll()
+                                    ->join('kas_keluar', 'kas_keluar.pengajuan_id = pengajuan.id')
+                                    ->where('pengajuan.status', 'pending')
+                                    ->orderBy('pengajuan.id', 'DESC')
+                                    ->findAll(),
+            // Ambil yang SUDAH PROSES (ACC, Ditolak, Dibayar)
+            'history_verifikasi' => $this->pengajuanModel->select('pengajuan.*, kas_keluar.*')
+                                    ->join('kas_keluar', 'kas_keluar.pengajuan_id = pengajuan.id')
+                                    ->whereIn('pengajuan.status', ['acc', 'ditolak', 'dibayar'])
+                                    ->orderBy('pengajuan.updated_at', 'DESC')
+                                    ->limit(10) // Tampilkan 10 terakhir aja biar nggak kepanjangan
+                                    ->findAll()
         ];
-        
+
         return view('manajer/persetujuan', $data);
-    }
+        }
 
     public function updateStatus()
     {
