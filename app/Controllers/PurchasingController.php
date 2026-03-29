@@ -37,56 +37,95 @@ class PurchasingController extends BaseController
     }
 
     public function pengajuan()
-    {
-        if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
+{
+    if (session()->get('role') !== 'purchasing') return redirect()->to('/login');
 
-        $data = [
-            'title'             => 'Form Pengajuan Kas Keluar',
-            'history_pengajuan' => $this->kasKeluarModel
-                                        ->where('nip_purchasing', session()->get('nip'))
-                                        ->orderBy('id', 'DESC')
-                                        ->findAll()
-        ];
-        
-        return view('purchasing/pengajuan', $data);
-    }
+    $pengajuanModel = new \App\Models\PengajuanModel();
+
+    $data = [
+        'title'             => 'Form Pengajuan Kas Keluar',
+        // Kita Join supaya dapet data dari dua tabel sekaligus
+        'history_pengajuan' => $pengajuanModel->select('pengajuan.*, kas_keluar.*')
+                                    ->join('kas_keluar', 'kas_keluar.pengajuan_id = pengajuan.id')
+                                    ->where('nip_purchasing', session()->get('nip'))
+                                    ->orderBy('pengajuan.id', 'DESC')
+                                    ->findAll()
+    ];
+    
+    return view('purchasing/pengajuan', $data);
+}
 
    public function simpanPengajuan()
 {
+    // Load Model-nya dulu
+    $pengajuanModel = new \App\Models\PengajuanModel();
+    $kasKeluarModel = new \App\Models\KasKeluarModel();
+    $db = \Config\Database::connect();
+
+    // --- MULAI TRANSAKSI ---
+    $db->transStart();
+
+    // GENERATE NOMOR PENGAJUAN (SRL-TGL-URUT)
+    $tgl = date('dmY');
+    $prefix = "SRL-" . $tgl . "-";
+    
+    // Cari nomor terakhir hari ini di tabel pengajuan
+    $lastEntry = $pengajuanModel->like('no_pengajuan', $prefix, 'after')
+                                ->orderBy('id', 'DESC')
+                                ->first();
+
+    if ($lastEntry) {
+        $lastNo = substr($lastEntry['no_pengajuan'], -3);
+        $nextNo = str_pad((int)$lastNo + 1, 3, '0', STR_PAD_LEFT);
+    } else {
+        $nextNo = "001";
+    }
+    $no_pengajuan = $prefix . $nextNo;
+
+    // SIMPAN KE TABEL INDUK (pengajuan)
+    $pengajuanModel->insert([
+        'no_pengajuan'      => $no_pengajuan,
+        'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
+        'divisi_peminta'    => $this->request->getPost('divisi_peminta'),
+        'deskripsi'         => $this->request->getPost('deskripsi'),
+        'status'            => 'pending',
+        'nip_purchasing'    => session()->get('nip'),
+    ]);
+
+    // AMBIL ID barusan untuk relasi ke tabel detail
+    $pengajuan_id = $pengajuanModel->getInsertID();
+
+    // HITUNG NOMINAL
     $nominal = (float) $this->request->getPost('nominal_barang');
     $ongkir  = (float) $this->request->getPost('biaya_ongkir');
-    
-    // LOGIC BARU: Cek apakah input 'pakai_ppn' ada nilainya (apapun nilainya asal dicentang)
-    $pajak = 0;
-    if ($this->request->getPost('pakai_ppn')) {
-        $pajak = round($nominal * 0.12);
-    }
+    $pajak   = $this->request->getPost('pakai_ppn') ? round($nominal * 0.12) : 0;
+    $total   = $nominal + $pajak + $ongkir;
 
-    $total = $nominal + $pajak + $ongkir;
-
-    // Ambil Nama Bank
+    // Cek Bank Manual
     $bank = $this->request->getPost('bank_vendor');
     if ($bank === 'LAINNYA') {
         $bank = $this->request->getPost('bank_manual');
     }
 
-    $this->kasKeluarModel->insert([
-        'tanggal_pengajuan' => $this->request->getPost('tanggal_pengajuan'),
-        'divisi_peminta'    => $this->request->getPost('divisi_peminta'),
-        'deskripsi'         => $this->request->getPost('deskripsi'),
-        'nama_vendor'       => strtoupper($this->request->getPost('nama_vendor')),
-        'bank_vendor'       => strtoupper($bank),
-        'rekening_vendor'   => preg_replace('/\D/', '', $this->request->getPost('rekening_vendor')),
-        'nominal_barang'    => $nominal,
-        'pajak_ppn'         => $pajak,
-        'biaya_ongkir'      => $ongkir,
-        'total_pengajuan'   => $total,
-        'status'            => 'pending',
-        'nip_purchasing'    => session()->get('nip'),
-        'created_at'        => date('Y-m-d H:i:s'),
-        'updated_at'        => date('Y-m-d H:i:s'),
+    // SIMPAN KE TABEL DETAIL (kas_keluar)
+    $kasKeluarModel->insert([
+        'pengajuan_id'     => $pengajuan_id,
+        'nama_vendor'      => strtoupper($this->request->getPost('nama_vendor')),
+        'bank_vendor'      => strtoupper($bank),
+        'rekening_vendor'  => preg_replace('/\D/', '', $this->request->getPost('rekening_vendor')),
+        'nominal_barang'   => $nominal,
+        'pajak_ppn'        => $pajak,
+        'biaya_ongkir'     => $ongkir,
+        'total_pengajuan'  => $total,
     ]);
 
-    return redirect()->to('/purchasing/pengajuan')->with('pesan', 'Pengajuan Berhasil!');
+    // --- SELESAI TRANSAKSI ---
+    $db->transComplete();
+
+    if ($db->transStatus() === FALSE) {
+        return redirect()->back()->with('error', 'Gagal menyimpan data pengajuan!');
+    }
+
+    return redirect()->to('/purchasing/pengajuan')->with('pesan', 'Pengajuan ' . $no_pengajuan . ' Berhasil Dikirim!');
 }
 }

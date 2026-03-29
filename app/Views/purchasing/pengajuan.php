@@ -214,30 +214,62 @@
                 <div class="card-header bg-white border-bottom py-3 small fw-bold text-secondary text-uppercase">Riwayat Terbaru</div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr><th>Penerima</th><th>Total</th><th>Status</th></tr>
-                            </thead>
-                           <tbody>
-                                <?php if(empty($history_pengajuan)): ?>
-                                    <tr><td colspan="3" class="text-center py-5">Belum ada riwayat.</td></tr>
-                                <?php else: ?>
-                                    <?php foreach($history_pengajuan as $row): ?>
-                                    <tr>
-                                        <td class="py-3">
-                                            <b class="text-dark d-block text-uppercase"><?= $row['nama_vendor'] ?></b>
-                                            <small class="text-muted"><?= $row['bank_vendor'] ?> - <?= $row['rekening_vendor'] ?></small>
-                                        </td>
-                                        <td>
-                                            <span class="text-primary fw-bold">Rp <?= number_format($row['total_pengajuan'],0,',','.') ?></span>
-                                        </td>
-                                        <td><span class="badge bg-warning text-dark"><?= strtoupper($row['status']) ?></span></td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 15%;">No Pengajuan</th>
+                <th style="width: 25%;">Proyek / Dinas</th>
+                <th style="width: 25%;">Penerima / Vendor</th>
+                <th style="width: 20%;">Total Nominal</th>
+                <th style="width: 15%;" class="text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if(empty($history_pengajuan)): ?>
+                <tr><td colspan="5" class="text-center py-5">Belum ada riwayat.</td></tr>
+            <?php else: ?>
+                <?php foreach($history_pengajuan as $row): ?>
+                <tr>
+                    <td>
+                        <span class="badge bg-primary text-white mb-1"><?= $row['no_pengajuan'] ?></span>
+                        <small class="text-muted d-block"><?= date('d/m/Y', strtotime($row['tanggal_pengajuan'])) ?></small>
+                    </td>
+
+                    <td>
+                        <b class="text-dark d-block text-uppercase" style="font-size: 0.85rem;">
+                            <i class="bi bi-building me-1"></i> <?= $row['divisi_peminta'] ?>
+                        </b>
+                        <small class="text-muted d-block mt-1 italic text-truncate" style="max-width: 180px;" title="<?= $row['deskripsi'] ?>">
+                            "<?= $row['deskripsi'] ?>"
+                        </small>
+                    </td>
+
+                    <td>
+                        <b class="text-dark d-block text-uppercase" style="font-size: 0.85rem;"><?= $row['nama_vendor'] ?></b>
+                        <small class="text-muted"><?= $row['bank_vendor'] ?> - <?= $row['rekening_vendor'] ?></small>
+                    </td>
+
+                    <td>
+                        <span class="text-primary fw-bold">Rp <?= number_format($row['total_pengajuan'], 0, ',', '.') ?></span>
+                    </td>
+
+                    <td class="text-center">
+                        <?php if($row['status'] == 'pending'): ?>
+                            <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i> PENDING</span>
+                        <?php elseif($row['status'] == 'acc'): ?>
+                            <span class="badge bg-success px-3 py-2" style="font-size: 0.7rem;"><i class="bi bi-check-circle me-1"></i> ACC</span>
+                        <?php elseif($row['status'] == 'dibayar'): ?>
+                            <span class="badge bg-info px-3 py-2" style="font-size: 0.7rem;"><i class="bi bi-cash me-1"></i> CAIR</span>
+                        <?php else: ?>
+                            <span class="badge bg-danger px-3 py-2" style="font-size: 0.7rem;"><i class="bi bi-x me-1"></i> DITOLAK</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
                 </div>
             </div>
         </div>
